@@ -95,3 +95,5 @@ target/
 # Debug files
 *.dSYM/
 
+# Ignore generated cpp files
+*.cpp
