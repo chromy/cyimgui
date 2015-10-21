@@ -1,10 +1,78 @@
 # distutils: language = c++
+# distutils: libraries = imgui
 # distutils: sources = imgui/imgui.cpp imgui/imgui_draw.cpp
 from libcpp cimport bool
 
 cdef extern from "imgui/imgui.h":
+    ctypedef struct ImVec2:
+        float x;
+        float y;
+
     ctypedef struct ImGuiIO:
-        pass
+        ImVec2 DisplaySize;
+        float DeltaTime;
+        float IniSavingRate;
+        const char* IniFilename;
+        const char* LogFilename;
+        float         MouseDoubleClickTime;
+        float         MouseDoubleClickMaxDist;
+        float         MouseDragThreshold;
+        #int           KeyMap[ImGuiKey_COUNT];
+        float         KeyRepeatDelay;
+        float         KeyRepeatRate;
+        #void*         UserData;
+
+        ImFontAtlas*  Fonts;
+        #float         FontGlobalScale;
+        #bool          FontAllowUserScaling;
+        #ImVec2        DisplayFramebufferScale;
+        #ImVec2        DisplayVisibleMin;
+        #ImVec2        DisplayVisibleMax;
+
+        void        (*RenderDrawListsFn)(ImDrawData* data);
+        #const char* (*GetClipboardTextFn)();
+        #void        (*SetClipboardTextFn)(const char* text);
+        #void*       (*MemAllocFn)(size_t sz);
+        #void        (*MemFreeFn)(void* ptr);
+        #void        (*ImeSetInputScreenPosFn)(int x, int y);
+        #void*       ImeWindowHandle;
+
+        #ImVec2      MousePos;
+        #bool        MouseDown[5];
+        #float       MouseWheel;
+        #bool        MouseDrawCursor;
+        #bool        KeyCtrl;
+        #bool        KeyShift;
+        #bool        KeyAlt;
+        #bool        KeysDown[512];
+        #ImWchar     InputCharacters[16+1];
+
+        #void AddInputCharacter(ImWchar c);
+        #void AddInputCharactersUTF8(const char* utf8_chars);
+
+        #bool        WantCaptureMouse;
+        #bool        WantCaptureKeyboard;
+        #bool        WantTextInput;
+        #float       Framerate;
+        #int         MetricsAllocs;
+        #int         MetricsRenderVertices;
+        #int         MetricsRenderIndices;
+        #int         MetricsActiveWindows;
+
+        #ImVec2      MousePosPrev;
+        #ImVec2      MouseDelta;
+        #bool        MouseClicked[5];
+        #ImVec2      MouseClickedPos[5];
+        #float       MouseClickedTime[5];
+        #bool        MouseDoubleClicked[5];
+        #bool        MouseReleased[5];
+        #bool        MouseDownOwned[5];
+        #float       MouseDownDuration[5];
+        #float       MouseDownDurationPrev[5];
+        #float       MouseDragMaxDistanceSqr[5];
+        #float       KeysDownDuration[512];
+        #float       KeysDownDurationPrev[512];
+
     ctypedef struct ImGuiStyle:
         pass
     ctypedef struct ImDrawCmd:
@@ -12,19 +80,28 @@ cdef extern from "imgui/imgui.h":
     ctypedef struct ImDrawList:
         pass
     ctypedef struct ImDrawData:
+        bool            Valid
+        ImDrawList**    CmdLists
+        int             CmdListsCount
+        int             TotalVtxCount
+        int             TotalIdxCount
+        void DeIndexAllBuffers()
+        void ScaleClipRects(const ImVec2& sc)
+
+    ctypedef struct ImFontConfig:
         pass
     ctypedef struct ImFont:
         pass
     ctypedef struct ImFontAtlas:
-        pass
+        ImFont* AddFontDefault(const ImFontConfig* font_cfg = NULL);
+        void GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL)
+        void GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL)
+
     ctypedef struct ImGuiIO:
         pass
     ctypedef struct ImGuiStorage:
         pass
     ctypedef struct ImGuiStyle:
-        pass
-
-    ctypedef struct ImVec2:
         pass
 
     ctypedef int ImGuiCol;
@@ -56,22 +133,22 @@ cdef extern from "imgui/imgui.h" namespace "ImGui":
     # Window
     bool Begin(const char* name, bool* p_opened, ImGuiWindowFlags flags); #TODO add optional arguments
     bool Begin(const char* name, bool* p_opened, const ImVec2& size_on_first_use, float bg_alpha, ImGuiWindowFlags flags);
-    #void End();
-    #bool BeginChild(const char* str_id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags extra_flags = 0);  # begin a scrolling region. size==0.0f: use remaining window size, size<0.0f: use remaining window size minus abs(size). size>0.0f: fixed size. each axis can use a different mode, e.g. ImVec2(0,400).
+    void End();
+    #bool BeginChild(const char* str_id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags extra_flags);  # begin a scrolling region. size==0.0f: use remaining window size, size<0.0f: use remaining window size minus abs(size). size>0.0f: fixed size. each axis can use a different mode, e.g. ImVec2(0,400).
     #bool BeginChild(ImGuiID id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags extra_flags = 0); # "
-    #void EndChild();
+    void EndChild()
     #ImVec2 GetContentRegionMax(); # current content boundaries (typically window boundaries including scrolling, or current column boundaries), in windows coordinates
     #ImVec2 GetContentRegionAvail(); # == GetContentRegionMax() - GetCursorPos()
     #float GetContentRegionAvailWidth(); #
     #ImVec2 GetWindowContentRegionMin(); # content boundaries min (roughly (0,0)-Scroll), in window coordinates
     #ImVec2 GetWindowContentRegionMax(); # content boundaries max (roughly (0,0)+Size-Scroll) where Size can be override with SetNextWindowContentSize(), in window coordinates
-    #float GetWindowContentRegionWidth(); # 
+    #float GetWindowContentRegionWidth(); #
     #ImDrawList*   GetWindowDrawList(); # get rendering command-list if you want to append your own draw primitives
     #ImFont* GetWindowFont();
     #float GetWindowFontSize(); # size (also height in pixels) of current font with current scale applied
-    #void SetWindowFontScale(float scale); # per-window font scale. Adjust IO.FontGlobalScale if you want to scale all windows
-    #ImVec2 GetWindowPos(); # get current window position in screen space (useful if you want to do your own drawing via the DrawList api)
-    #ImVec2 GetWindowSize(); # get current window size
+    void SetWindowFontScale(float scale)
+    ImVec2 GetWindowPos()
+    ImVec2 GetWindowSize()
     #float GetWindowWidth();
     #float GetWindowHeight();
     #bool IsWindowCollapsed();
@@ -80,7 +157,7 @@ cdef extern from "imgui/imgui.h" namespace "ImGui":
     #void SetNextWindowPosCenter(ImGuiSetCond cond = 0); # set next window position to be centered on screen. call before Begin()
     #void SetNextWindowSize(const ImVec2& size, ImGuiSetCond cond = 0); # set next window size. set axis to 0.0f to force an auto-fit on this axis. call before Begin()
     #void SetNextWindowContentSize(const ImVec2& size); # set next window content size (enforce the range of scrollbars). set axis to 0.0f to leave it automatic. call before Begin()
-    #void SetNextWindowContentWidth(float width); # set next window content width (enforce the range of horizontal scrollbar). call before Begin() 
+    #void SetNextWindowContentWidth(float width); # set next window content width (enforce the range of horizontal scrollbar). call before Begin()
     #void SetNextWindowCollapsed(bool collapsed, ImGuiSetCond cond = 0); # set next window collapsed state. call before Begin()
     #void SetNextWindowFocus(); # set next window to be focused / front-most. call before Begin()
     #void SetWindowPos(const ImVec2& pos, ImGuiSetCond cond = 0); # set current window position - call within Begin()/End(). may incur tearing
@@ -167,7 +244,7 @@ cdef extern from "imgui/imgui.h" namespace "ImGui":
     #ImGuiID GetID(const void* ptr_id);
 
     ## Widgets
-    #void Text(const char* fmt, ...) IM_PRINTFARGS(1);
+    void Text(const char* text)
     #void TextV(const char* fmt, va_list args);
     #void TextColored(const ImVec4& col, const char* fmt, ...) IM_PRINTFARGS(2);  # shortcut for PushStyleColor(ImGuiCol_Text, col); Text(fmt, ...); PopStyleColor();
     #void TextColoredV(const ImVec4& col, const char* fmt, va_list args);
@@ -366,5 +443,3 @@ cdef extern from "imgui/imgui.h" namespace "ImGui":
     #void* GetInternalState();
     #size_t GetInternalStateSize();
     #void SetInternalState(void* state, bool construct = false);
-
-
