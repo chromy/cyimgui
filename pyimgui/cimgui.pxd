@@ -1,9 +1,8 @@
 # distutils: language = c++
-# distutils: libraries = imgui
-# distutils: sources = imgui/imgui.cpp imgui/imgui_draw.cpp
+# distutils: include_dirs = imgui
 from libcpp cimport bool
 
-cdef extern from "imgui/imgui.h":
+cdef extern from "imgui.h":
     ctypedef struct ImVec2:
         float x;
         float y;
@@ -115,7 +114,7 @@ cdef extern from "imgui/imgui.h":
     ctypedef int ImGuiInputTextFlags;
     ctypedef int ImGuiSelectableFlags;
 
-cdef extern from "imgui/imgui.h" namespace "ImGui":
+cdef extern from "imgui.h" namespace "ImGui":
     # Main
     ImGuiIO& GetIO();
     ImGuiStyle& GetStyle();
@@ -132,7 +131,7 @@ cdef extern from "imgui/imgui.h" namespace "ImGui":
 
     # Window
     bool Begin(const char* name, bool* p_opened, ImGuiWindowFlags flags); #TODO add optional arguments
-    bool Begin(const char* name, bool* p_opened, const ImVec2& size_on_first_use, float bg_alpha, ImGuiWindowFlags flags);
+    #bool Begin(const char* name, bool* p_opened, const ImVec2& size_on_first_use, float bg_alpha, ImGuiWindowFlags flags);
     void End();
     #bool BeginChild(const char* str_id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags extra_flags);  # begin a scrolling region. size==0.0f: use remaining window size, size<0.0f: use remaining window size minus abs(size). size>0.0f: fixed size. each axis can use a different mode, e.g. ImVec2(0,400).
     #bool BeginChild(ImGuiID id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags extra_flags = 0); # "

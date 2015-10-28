@@ -1,3 +1,5 @@
+# distutils: language = c++
+# distutils: sources = imgui/imgui.cpp imgui/imgui_draw.cpp
 cimport cimgui
 from cimgui cimport ImVec2, ImGuiIO, ImDrawData, ImFontAtlas, ImDrawData
 

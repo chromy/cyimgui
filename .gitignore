@@ -95,5 +95,12 @@ target/
 # Debug files
 *.dSYM/
 
-# Ignore generated cpp files
+# Ignore generated cpp and *.c files
 *.cpp
+*.c
+
+# Cython files
+cython_debug
+
+# Imgui files
+imgui.ini
